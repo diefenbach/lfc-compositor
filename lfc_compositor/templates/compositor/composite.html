@@ -1,0 +1,21 @@
+{% extends "lfc/base.html" %}
+{% load compositor_tags %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}compositor/compositor.css">
+{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript" src="{{ MEDIA_URL }}compositor/compositor.js"></script>
+{% endblock %}
+
+{% block content %}
+    {% if lfc_context.display_title %}
+        <h1 class="first-heading">{{ lfc_context.title }}</h1>
+    {% endif %}
+
+    <table>{% render %}</table>
+
+    <div id="composite-dialog"><div id="close"></div></div>
+
+{% endblock %}

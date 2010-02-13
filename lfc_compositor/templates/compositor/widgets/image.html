@@ -1,0 +1,6 @@
+<div>
+    <img alt="image" src="{{ image_url }}" />  
+    {% if request.user.is_superuser %}
+        <a class="compositor-edit" href="{% url composite_get_widget_form widget.id %}">Edit</a>
+    {% endif %}
+</div>

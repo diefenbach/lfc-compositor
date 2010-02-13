@@ -1,0 +1,16 @@
+{% load i18n %}
+
+<td width="{{ width }}%">
+
+    {% if request.user.is_superuser %}
+        <form action="{% url compositor_add_widget column.id %}">
+            <select name="type">
+                <option value="textwidget">{% trans "Text" %}</option>
+                <option value="imagewidget">{% trans "Image" %}</option>
+            </select>
+            <input type="submit" value='{% trans "Go" %}' />
+        </form>
+    {% endif %}
+
+    {{ content|safe }}
+</td>

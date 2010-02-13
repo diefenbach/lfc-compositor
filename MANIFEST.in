@@ -1,0 +1,3 @@
+include README.txt
+recursive-include lfc_compositor/templates *
+recursive-include lfc_compositor/locale *

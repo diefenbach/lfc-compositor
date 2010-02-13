@@ -1,0 +1,5 @@
+{% if IMAGE_LEFT  %}
+<img alt="image" class="left" src="{{ image.url_200x200 }}" /><p>{{ text|safe }}</p>
+{% else %}
+<img alt="image" class="right" src="{{ image.url_200x200 }}" /><p>{{ text|safe }}</p>
+{% endif %}
