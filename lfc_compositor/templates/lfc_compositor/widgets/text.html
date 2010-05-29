@@ -1,0 +1,11 @@
+<div>
+    <p>
+        {{ widget.content|safe }} 
+    </p>
+    {% if request.user.is_superuser %}
+        <div>
+            <a class="compositor-edit" href="{% url compositor_get_widget_form widget.id %}">Edit</a> |
+            <a class="compositor-delete" href="{% url compositor_delete_widget widget.id %}">Delete</a>
+        </div>
+    {% endif %}
+<div>

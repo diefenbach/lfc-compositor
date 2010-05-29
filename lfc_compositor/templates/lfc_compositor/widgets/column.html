@@ -3,10 +3,13 @@
 <td width="{{ width }}%">
 
     {% if request.user.is_superuser %}
+        <a href="{% url compositor_delete_column column.id %}">delete column</a>
         <form action="{% url compositor_add_widget column.id %}">
             <select name="type">
                 <option value="textwidget">{% trans "Text" %}</option>
                 <option value="imagewidget">{% trans "Image" %}</option>
+                <option value="textwithimagewidget">{% trans "Text with Image" %}</option>
+                <option value="referencewidget">{% trans "Reference" %}</option>
             </select>
             <input type="submit" value='{% trans "Go" %}' />
         </form>

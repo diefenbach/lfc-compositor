@@ -3,7 +3,7 @@ from django import template
 
 register = template.Library()
 
-@register.inclusion_tag('compositor/widgets/render.html', takes_context=True)
+@register.inclusion_tag('lfc_compositor/widgets/render.html', takes_context=True)
 def render(context):
     """
     """

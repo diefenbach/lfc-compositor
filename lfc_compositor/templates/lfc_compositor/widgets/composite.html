@@ -1,0 +1,4 @@
+{{ content|safe }}
+{% if request.user.is_superuser %}
+    <a href="{% url compositor_add_row composite.id %}">add row</a>
+{% endif %}

@@ -21,7 +21,7 @@ def install():
     register_content_type(Composite, name = "Composite", templates=["Composite"], default_template="Composite")
 
     # Register Templates
-    register_template(name = "Composite", path="compositor/composite.html")
+    register_template(name = "Composite", path="lfc_compositor/composite.html")
     
 def uninstall():
     """Uninstalls the compositor application.

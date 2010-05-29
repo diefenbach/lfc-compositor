@@ -1,0 +1,9 @@
+{% if request.user.is_superuser %}
+    <div>
+        <a href="{% url compositor_delete_row row.id %}">delete row</a>
+        <a href="{% url compositor_add_column row.id %}">add column</a>
+    </div>
+{% endif %}
+<table class="lfc-compositor-default" {% if request.user.is_superuser %}border="1"{% endif %}>
+    <tr>{{ content|safe }}</tr>
+</table>

@@ -24,7 +24,7 @@ def save_widget(request, id):
 
     return HttpResponseRedirect(_get_composite(widget).get_absolute_url())
 
-def get_widget_form(request, id, template="compositor/widgets/form.html"):
+def get_widget_form(request, id, template="lfc_compositor/widgets/form.html"):
     """Returns the form of the widget with the id.
     """
     widget = Widget.objects.get(pk=id)
@@ -52,6 +52,18 @@ def add_row(request, id):
 
     return HttpResponseRedirect(composite.get_absolute_url())
 
+def delete_row(request, id):
+    """
+    """
+    try:
+        row = Row.objects.get(pk=id)
+    except Row.DoesNotExist:
+        pass
+    else:
+        row.delete()
+
+    return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
 def add_column(request, id):
     """
     """
@@ -59,6 +71,18 @@ def add_column(request, id):
     column = Column.objects.create(parent=row)
 
     return HttpResponseRedirect(_get_composite(row).get_absolute_url())
+
+def delete_column(request, id):
+    """
+    """
+    try:
+        column = Column.objects.get(pk=id)
+    except Column.DoesNotExist:
+        pass
+    else:
+        column.delete()
+
+    return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 def add_widget(request, id):
     """
@@ -73,3 +97,15 @@ def add_widget(request, id):
     mc.objects.create(parent=column)
 
     return HttpResponseRedirect(_get_composite(column).get_absolute_url())
+
+def delete_widget(request, id):
+    """
+    """
+    try:
+        widget = Widget.objects.get(pk=id)
+    except Widget.DoesNotExist:
+        pass
+    else:
+        widget.delete()
+
+    return HttpResponseRedirect(request.META.get("HTTP_REFERER"))

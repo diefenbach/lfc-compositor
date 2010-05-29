@@ -1,4 +1,0 @@
-{{ content|safe }}
-{% if request.user.is_superuser %}
-    <a href="{% url composite_add_row composite.id %}">add row</a>
-{% endif %}

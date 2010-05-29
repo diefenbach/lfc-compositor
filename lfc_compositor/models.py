@@ -40,7 +40,7 @@ class Composite(BaseContent):
         for row in self.get_rows():
             content += row.render(request)
 
-        return render_to_string("compositor/widgets/composite.html", RequestContext(request, {
+        return render_to_string("lfc_compositor/widgets/composite.html", RequestContext(request, {
             "composite" : self,
             "content" : content
         }))
@@ -90,7 +90,7 @@ class Row(models.Model):
         for column in self.get_columns():
             content += column.render(request)
 
-        return render_to_string("compositor/widgets/row.html", RequestContext(request, {
+        return render_to_string("lfc_compositor/widgets/row.html", RequestContext(request, {
             "row" : self,
             "content" : content
         }))
@@ -118,7 +118,7 @@ class Column(models.Model):
     def get_widgets(self):
         """
         """
-        return self.widgets.all()
+        return self.widgets.order_by("position")
 
     def render(self, request):
         """
@@ -131,7 +131,7 @@ class Column(models.Model):
 
         width = 100 / columns
 
-        return render_to_string("compositor/widgets/column.html", RequestContext(request, {
+        return render_to_string("lfc_compositor/widgets/column.html", RequestContext(request, {
             "content" : content,
             "column" : self,
             "width" : width,
@@ -155,6 +155,9 @@ class Widget(models.Model):
     parent = models.ForeignKey(Column, verbose_name=_(u"Column"), related_name="widgets")
     position = models.IntegerField(_(u"Position"), blank=True, null=True)
     content_type = models.CharField(blank=True, max_length=100)
+
+    class Meta:
+        ordering = ("position", )
 
     def save(self, force_insert=False, force_update=False):
         """
@@ -212,14 +215,14 @@ class TextWidget(Widget):
         return TextWidgetForm(**kwargs)
 
     def render(self, request):
-        return render_to_string("compositor/widgets/text.html", RequestContext(request, {
+        return render_to_string("lfc_compositor/widgets/text.html", RequestContext(request, {
             "widget" : self,
         }))
 
 class TextWidgetForm(forms.ModelForm):
     class Meta:
         model = TextWidget
-        fields = ("content", )
+        fields = ("position", "content", )
 
 class ImageWidget(Widget):
     """An simple image widget.
@@ -242,7 +245,7 @@ class ImageWidget(Widget):
         """Renders the widget as HTML.
         """
         image_url = getattr(self.image, "url_%s" % self.get_size_display())
-        return render_to_string("compositor/widgets/image.html", RequestContext(request, {
+        return render_to_string("lfc_compositor/widgets/image.html", RequestContext(request, {
             "widget" : self,
             "image_url" : image_url,
         }))
@@ -250,9 +253,9 @@ class ImageWidget(Widget):
 class ImageWidgetForm(forms.ModelForm):
     class Meta:
         model = ImageWidget
-        fields = ("size", "image", )
+        fields = ("position", "size", "image", )
 
-class TextWithImage(Widget):
+class TextWithImageWidget(Widget):
     """A text with a image widget. The image can be at the left or right site.
 
     **Parameters**:
@@ -260,16 +263,64 @@ class TextWithImage(Widget):
     image_position
         The position of the image: left, right.
     """
-    image_position = models.IntegerField(_(u"Position"), default = LEFT)
     content = models.TextField(_(u"Text"), blank=True)
     image = ImageWithThumbsField(_(u"Image"), upload_to="uploads",
         sizes=((60, 60), (100, 100), (200, 200), (400, 400), (600, 600), (800, 800)))
-
+    image_position = models.IntegerField(_(u"Position"), default = LEFT)
+    size = models.PositiveSmallIntegerField(_(u"Size"), choices=((0, "60x60"), (1, "100x100"), (2, "200x200"), (3, "400x400"), (4, "600x600"), (5, "800x800")), default=2)
+    
     def get_searchable_text(self):
         return self.content
 
-    def render(self):
-        return render_to_string("compositor/widgets/text_with_image.html", RequestContext(request, {
+    def form(self, **kwargs):
+        """Returns the add/edit form of the image widget.
+        """
+        return TextWithImageWidgetForm(**kwargs)
+
+    def render(self, request):
+        image_url = getattr(self.image, "url_%s" % self.get_size_display())
+        return render_to_string("lfc_compositor/widgets/text_with_image.html", RequestContext(request, {
             "widget" : self,
+            "image_url" : image_url,
             "IMAGE_LEFT" : self.image_position == LEFT,
         }))
+
+class TextWithImageWidgetForm(forms.ModelForm):
+    class Meta:
+        model = TextWithImageWidget
+        fields = ("position", "image", "size",  "image_position", "content")
+
+class ReferenceWidget(Widget):
+    """A widget to display existing content.
+
+    **Parameters**:
+
+    parent
+        The composite the of the row.
+
+    reference
+        The referenced content object.
+    """
+    reference = models.ForeignKey(BaseContent, verbose_name=_(u"Reference"), blank=True, null=True)
+
+    def get_searchable_text(self):
+        try:
+            return self.reference.get_content_object().get_searchable_text()
+        except AttributeError:
+            return ""
+
+    def form(self, **kwargs):
+        """Returns the add/edit form of the text widget.
+        """
+        return ReferenceWidgetForm(**kwargs)
+
+    def render(self, request):
+        # content = self.reference.get_content_object()
+        return render_to_string("lfc_compositor/widgets/reference.html", RequestContext(request, {
+            "widget" : self,
+        }))
+
+class ReferenceWidgetForm(forms.ModelForm):
+    class Meta:
+        model = ReferenceWidget
+        fields = ("position", "reference", )
