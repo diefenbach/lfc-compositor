@@ -1,15 +1,18 @@
 {% load i18n %}
-<form action="{% url compositor_save_widget widget.id %}"
+<form action="{% url compositor_add_widget %}"
       method="POST"
       enctype="multipart/form-data">
 
-    <h1>{% trans "Edit Widget" %}</h1>
+    <h1>{% trans "Add Widget" %}</h1>
 
     <table>
         {% include "lfc/manage/lfc_form.html" %}
     </table>
-
-    <input class="compositor-form-button-2" 
+    
+    <input type="hidden" name="type" value="{{ type }}" />
+    <input type="hidden" name="column_id" value="{{ column_id }}" />
+    
+    <input class="compositor-form-button-2"
            type="submit" />
 </form>
 

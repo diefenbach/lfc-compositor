@@ -1,19 +1,51 @@
 {% load i18n %}
 
-<td width="{{ width }}%">
+<td class="column-{{ column.id }}" {% if column.width %}width="{{ column.width }}%"{% endif %}>
+    {% if edit %}
+        <div style="clear: both">
+            {% if deletable %}
+                <a class="cp-hover compositor-link compositor-delete-column"
+                   id="column-{{ column.id }}"
+                   href="{% url compositor_delete_column column.id %}">
+                    <img src="{{ MEDIA_URL }}lfc/icons/delete.png" alt='{% trans "Delete Column" %}' title='{% trans "Delete Column" %}'/>
+                </a>
+            {% endif %}
+            {% if not first_col %}
+                <a class="cp-hover compositor-link"
+                   id="column-{{ column.id }}"
+                   href="{% url compositor_move_column column.id %}?direction=0">
+                    <img src="{{ MEDIA_URL }}lfc/icons/arrow_left.png" alt='{% trans "Left" %}' title='{% trans "Left" %}' />
+                </a>                
+            {% endif %}
+            {% if not last_col %}
+                <a class="cp-hover compositor-link"
+                   id="column-{{ column.id }}"
+                   href="{% url compositor_move_column column.id %}?direction=1">
+                    <img src="{{ MEDIA_URL }}lfc/icons/arrow_right.png" alt='{% trans "Right" %}' title='{% trans "Right" %}' />
+                </a>
+            {% endif %}
+            <input type="text"
+                   style="width:40px"
+                   {% if column.width %}value="{{ column.width }}{% endif %}"
+                   data="{% url compositor_change_width column.id %}"
+                   class="compositor-width" />
+       </div>
 
-    {% if request.user.is_superuser %}
-        <a href="{% url compositor_delete_column column.id %}">delete column</a>
-        <form action="{% url compositor_add_widget column.id %}">
+        {{ content|safe }}
+
+        <form style="clear: both; padding: 10px 0" action="{% url compositor_add_widget_form %}"
+              method="POST">
             <select name="type">
                 <option value="textwidget">{% trans "Text" %}</option>
                 <option value="imagewidget">{% trans "Image" %}</option>
                 <option value="textwithimagewidget">{% trans "Text with Image" %}</option>
                 <option value="referencewidget">{% trans "Reference" %}</option>
             </select>
-            <input type="submit" value='{% trans "Go" %}' />
-        </form>
-    {% endif %}
 
-    {{ content|safe }}
+            <input type="hidden" name="column_id" value="{{ column.id }}">
+            <input class="compositor-form-button" type="submit" value='{% trans "Add Widget" %}' />
+        </form>
+    {% else %}
+        {{ content|safe }}
+    {% endif %}
 </td>

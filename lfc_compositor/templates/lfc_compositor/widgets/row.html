@@ -1,9 +1,34 @@
-{% if request.user.is_superuser %}
-    <div>
-        <a href="{% url compositor_delete_row row.id %}">delete row</a>
-        <a href="{% url compositor_add_column row.id %}">add column</a>
+{% load i18n %}
+{% if edit %}
+    <div style="background-color: transparent">
+
+        {% if not first_row %}
+            <a class="cp-hover compositor-link"
+               id="row-{{ row.id }}"
+               href="{% url compositor_move_row row.id %}?direction=0">
+               <img src="{{ MEDIA_URL }}lfc/icons/arrow_up.png" alt='{% trans "Up" %}' title='{% trans "Up" %}' />
+            </a>
+        {% endif %}
+
+        {% if not last_row %}
+            <a class="cp-hover compositor-link"
+               id="row-{{ row.id }}"
+               href="{% url compositor_move_row row.id %}?direction=1">
+               <img src="{{ MEDIA_URL }}lfc/icons/arrow_down.png" alt='{% trans "Down" %}' title='{% trans "Down" %}' />
+            </a>
+        {% endif %}
+
+        <a class="cp-hover compositor-link"
+           id="row-{{ row.id }}"
+           href="{% url compositor_delete_row row.id %}">
+            <img src="{{ MEDIA_URL }}lfc/icons/delete.png" alt='{% trans "Delete Row" %}' title='{% trans "Delete Row" %}'/>
+        </a>
+        <a class="compositor-link"
+           href="{% url compositor_add_column row.id %}">
+            <img src="{{ MEDIA_URL }}lfc/icons/add.png" alt='{% trans "Add Column" %}' title='{% trans "Add Column" %}'/>
+        </a>
     </div>
 {% endif %}
-<table class="lfc-compositor-default" {% if request.user.is_superuser %}border="1"{% endif %}>
-    <tr>{{ content|safe }}</tr>
+<table class="row-{{ row.id }} lfc-compositor-default">
+    <tr class="compositor-row row-{{ row.id }}" >{{ content|safe }}</tr>
 </table>

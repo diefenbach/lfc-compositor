@@ -1,0 +1,24 @@
+{% load i18n %}
+<div style="clear: both; background-color: transparent">
+    {% if not first_widget %}
+        <a class="compositor-link"
+           id="widget-{{ widget.id }}"
+           href="{% url compositor_move_widget widget.id %}?direction=0">
+            <img src="{{ MEDIA_URL }}lfc/icons/arrow_up.png" alt='{% trans "Up" %}' title='{% trans "Up" %}' />
+        </a>
+    {% endif %}
+
+    {% if not last_widget %}
+        <a class="compositor-link"
+           id="widget-{{ widget.id }}"
+           href="{% url compositor_move_widget widget.id %}?direction=1">
+            <img src="{{ MEDIA_URL }}lfc/icons/arrow_down.png" alt='{% trans "Down" %}' title='{% trans "Down" %}' />
+        </a>
+    {% endif %}
+    <a class="cp-hover compositor-delete-link" id="widget-{{ widget.id }}" href="{% url compositor_delete_widget widget.id %}">
+       <img src="{{ MEDIA_URL }}lfc/icons/delete.png" alt='{% trans "Delete Widget" %}' title='{% trans "Delete Widget" %}'/>
+    </a>
+    <a class="cp-hover compositor-link-2" id="widget-{{ widget.id }}" href="{% url compositor_edit_widget_form widget.id %}">
+       <img src="{{ MEDIA_URL }}lfc/icons/edit.png" alt='{% trans "Edit" %}' title='{% trans "Edit" %}'/>
+    </a>
+</div>

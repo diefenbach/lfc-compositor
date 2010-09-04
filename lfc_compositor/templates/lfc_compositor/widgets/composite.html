@@ -1,4 +1,10 @@
+{% load i18n %}
 {{ content|safe }}
-{% if request.user.is_superuser %}
-    <a href="{% url compositor_add_row composite.id %}">add row</a>
+{% if edit %}
+    <div>
+        <a class="compositor-link" 
+           href="{% url compositor_add_row composite.id %}">
+           <img src="{{ MEDIA_URL }}lfc/icons/add.png" alt='{% trans "Add Row" %}' title='{% trans "Add Row" %}'/>           
+        </a>
+    </div>
 {% endif %}

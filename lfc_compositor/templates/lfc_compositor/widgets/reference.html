@@ -1,9 +1,22 @@
+{% load i18n %}
 <div>
-    {{ widget.reference.get_content_object.text|safe }}
-    {% if request.user.is_superuser %}
-        <div>
-            <a class="compositor-edit" href="{% url compositor_get_widget_form widget.id %}">Edit</a>
-            <a class="compositor-delete" href="{% url compositor_delete_widget widget.id %}">Delete</a>
-        </div>
+    {% if edit %}
+        {% include "lfc_compositor/widgets/widget_navigation.html" %}
     {% endif %}
+    <div class="widget-{{ widget.id }}">
+        {% if widget.display_title %}
+            <h1>
+                <a href="{{ widget.reference.get_content_object.get_absolute_url }}">{{ widget.reference.get_content_object.title }}</a>                
+            </h1>
+        {% endif %}
+        {% if widget.words %}
+            {{ widget.reference.get_content_object.text|truncatewords_html:widget.words|safe }}
+        {% else %}
+            {{ widget.reference.get_content_object.text|safe }}
+        {% endif %}
+        
+        {% if widget.display_link %}
+            <p><a href="{{ widget.reference.get_content_object.get_absolute_url }}">{% trans "More" %}</a></p>
+        {% endif %}
+    </div>
 <div>

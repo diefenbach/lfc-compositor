@@ -33,16 +33,29 @@ class Composite(BaseContent):
         """
         return Row.objects.filter(parent=self)
 
-    def render(self, request):
+    def render(self, request, edit=False):
         """
         """
+        rows = self.get_rows()
+        amount = len(rows)-1
         content = ""
-        for row in self.get_rows():
-            content += row.render(request)
+        for i, row in enumerate(self.get_rows()):
+            if i == 0:
+                is_first = True
+            else:
+                is_first = False
+
+            if i == amount:
+                is_last = True
+            else:
+                is_last = False
+
+            content += row.render(request, edit, is_first, is_last)
 
         return render_to_string("lfc_compositor/widgets/composite.html", RequestContext(request, {
             "composite" : self,
-            "content" : content
+            "content" : content,
+            "edit" : edit,
         }))
 
     def form(self, **kwargs):
@@ -59,6 +72,9 @@ class CompositeForm(forms.ModelForm):
         model = Composite
         fields = ("title", "display_title", "slug", "tags")
 
+    def extra(self, request):
+        return self.instance.render(request, True)
+
 class Row(models.Model):
     """A row for composite. A row can have multiple columns.
 
@@ -68,7 +84,11 @@ class Row(models.Model):
         The composite the of the row.
     """
     parent = models.ForeignKey(Composite, verbose_name=_(u"Parent"), related_name="rows")
-    position = models.IntegerField(default=1000)
+    position = models.IntegerField(default=1)
+    width = models.FloatField(default=100)
+
+    class Meta:
+        ordering = ("position", )
 
     def __unicode__(self):
         return "Row %s" % self.id
@@ -85,14 +105,29 @@ class Row(models.Model):
 
         return searchable_text.strip()
 
-    def render(self, request):
+    def render(self, request, edit=False, first_row=False, last_row=False):
+        columns = self.get_columns()
+        amount = len(columns) - 1
         content = ""
-        for column in self.get_columns():
-            content += column.render(request)
+        for i, column in enumerate(self.get_columns()):
+            if i == 0:
+                first_col = True
+            else:
+                first_col = False
+
+            if i == amount:
+                last_col = True
+            else:
+                last_col = False
+
+            content += column.render(request, edit, first_col, last_col)
 
         return render_to_string("lfc_compositor/widgets/row.html", RequestContext(request, {
             "row" : self,
-            "content" : content
+            "content" : content,
+            "edit" : edit,
+            "first_row" : first_row,
+            "last_row" : last_row,            
         }))
 
 class Column(models.Model):
@@ -104,7 +139,11 @@ class Column(models.Model):
         The composite the of the row.
     """
     parent = models.ForeignKey(Row, verbose_name=_(u"Parent"), related_name="columns")
-    position = models.IntegerField(default=1000)
+    position = models.IntegerField(default=1)
+    width = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        ordering = ("position", )
 
     def get_searchable_text(self):
         """
@@ -120,12 +159,26 @@ class Column(models.Model):
         """
         return self.widgets.order_by("position")
 
-    def render(self, request):
+    def render(self, request, edit=False, first_col=False, last_col=False):
         """
         """
+        widgets = self.get_widgets()
+        amount = len(widgets)-1
+        
         content = ""
-        for widget in self.get_widgets():
-            content += widget.render(request)
+        for i, widget in enumerate(widgets):
+
+            if i == 0:
+                first_widget = True
+            else:
+                first_widget = False
+
+            if i == amount:
+                last_widget = True
+            else:
+                last_widget = False
+            
+            content += widget.render(request, edit, first_widget, last_widget)
 
         columns = self.parent.columns.count()
 
@@ -135,6 +188,10 @@ class Column(models.Model):
             "content" : content,
             "column" : self,
             "width" : width,
+            "edit" : edit,
+            "deletable" : columns > 1,
+            "first_col" : first_col,
+            "last_col" : last_col,
         }))
 
 class Widget(models.Model):
@@ -190,8 +247,8 @@ class Widget(models.Model):
         """
         return ""
 
-    def render(self, request):
-        return self.get_content_object().render(request)
+    def render(self, request, edit=False, first_widget=False, last_widget=False):
+        return self.get_content_object().render(request, edit, first_widget, last_widget)
 
 class TextWidget(Widget):
     """A simple text widget.
@@ -214,15 +271,18 @@ class TextWidget(Widget):
         """
         return TextWidgetForm(**kwargs)
 
-    def render(self, request):
+    def render(self, request, edit=False, first_widget=False, last_widget=False):
         return render_to_string("lfc_compositor/widgets/text.html", RequestContext(request, {
             "widget" : self,
+            "edit" : edit,
+            "first_widget" : first_widget, 
+            "last_widget" : last_widget,
         }))
 
 class TextWidgetForm(forms.ModelForm):
     class Meta:
         model = TextWidget
-        fields = ("position", "content", )
+        fields = ("content", )
 
 class ImageWidget(Widget):
     """An simple image widget.
@@ -241,19 +301,22 @@ class ImageWidget(Widget):
         """
         return ImageWidgetForm(**kwargs)
 
-    def render(self, request):
+    def render(self, request, edit=False, first_widget=False, last_widget=False):
         """Renders the widget as HTML.
         """
         image_url = getattr(self.image, "url_%s" % self.get_size_display())
         return render_to_string("lfc_compositor/widgets/image.html", RequestContext(request, {
             "widget" : self,
             "image_url" : image_url,
+            "edit" : edit,
+            "first_widget" : first_widget, 
+            "last_widget" : last_widget,            
         }))
 
 class ImageWidgetForm(forms.ModelForm):
     class Meta:
         model = ImageWidget
-        fields = ("position", "size", "image", )
+        fields = ("size", "image", )
 
 class TextWithImageWidget(Widget):
     """A text with a image widget. The image can be at the left or right site.
@@ -268,7 +331,7 @@ class TextWithImageWidget(Widget):
         sizes=((60, 60), (100, 100), (200, 200), (400, 400), (600, 600), (800, 800)))
     image_position = models.IntegerField(_(u"Position"), default = LEFT)
     size = models.PositiveSmallIntegerField(_(u"Size"), choices=((0, "60x60"), (1, "100x100"), (2, "200x200"), (3, "400x400"), (4, "600x600"), (5, "800x800")), default=2)
-    
+
     def get_searchable_text(self):
         return self.content
 
@@ -277,18 +340,21 @@ class TextWithImageWidget(Widget):
         """
         return TextWithImageWidgetForm(**kwargs)
 
-    def render(self, request):
+    def render(self, request, edit=False, first_widget=False, last_widget=False):
         image_url = getattr(self.image, "url_%s" % self.get_size_display())
         return render_to_string("lfc_compositor/widgets/text_with_image.html", RequestContext(request, {
             "widget" : self,
             "image_url" : image_url,
             "IMAGE_LEFT" : self.image_position == LEFT,
+            "edit" : edit,
+            "first_widget" : first_widget, 
+            "last_widget" : last_widget,            
         }))
 
 class TextWithImageWidgetForm(forms.ModelForm):
     class Meta:
         model = TextWithImageWidget
-        fields = ("position", "image", "size",  "image_position", "content")
+        fields = ("image", "size",  "image_position", "content")
 
 class ReferenceWidget(Widget):
     """A widget to display existing content.
@@ -302,6 +368,9 @@ class ReferenceWidget(Widget):
         The referenced content object.
     """
     reference = models.ForeignKey(BaseContent, verbose_name=_(u"Reference"), blank=True, null=True)
+    display_title = models.BooleanField(default=True)
+    display_link = models.BooleanField(default=False)
+    words = models.IntegerField(blank=True, null=True)
 
     def get_searchable_text(self):
         try:
@@ -314,13 +383,16 @@ class ReferenceWidget(Widget):
         """
         return ReferenceWidgetForm(**kwargs)
 
-    def render(self, request):
+    def render(self, request, edit=False, first_widget=False, last_widget=False):
         # content = self.reference.get_content_object()
         return render_to_string("lfc_compositor/widgets/reference.html", RequestContext(request, {
             "widget" : self,
+            "edit" : edit,
+            "first_widget" : first_widget, 
+            "last_widget" : last_widget,            
         }))
 
 class ReferenceWidgetForm(forms.ModelForm):
     class Meta:
         model = ReferenceWidget
-        fields = ("position", "reference", )
+        fields = ("reference", "words", "display_title", "display_link")

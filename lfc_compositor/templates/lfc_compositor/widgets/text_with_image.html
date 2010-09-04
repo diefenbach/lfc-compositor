@@ -1,13 +1,12 @@
+{% load i18n %}
 <div>
-    {% if IMAGE_LEFT  %}
-        <img alt="image" class="left" src="{{ image_url }}" /><p>{{ widget.content|safe }}</p>
-    {% else %}
-        <img alt="image" class="right" src="{{ image_url }}" /><p>{{ widget.content|safe }}</p>
+    {% if edit %}
+        {% include "lfc_compositor/widgets/widget_navigation.html" %}
     {% endif %}
-    {% if request.user.is_superuser %}
-        <div>
-            <a class="compositor-edit" href="{% url compositor_get_widget_form widget.id %}">Edit</a>
-            <a class="compositor-delete" href="{% url compositor_delete_widget widget.id %}">Delete</a>
-        </div>
+
+    {% if IMAGE_LEFT  %}
+        <img alt="image" class="widget-{{ widget.id }} left" src="{{ image_url }}" /><p>{{ widget.content|safe }}</p>
+    {% else %}
+        <img alt="image" class="widget-{{ widget.id }} right" src="{{ image_url }}" /><p>{{ widget.content|safe }}</p>
     {% endif %}
 </div>
