@@ -11,17 +11,24 @@ from lfc_compositor.models import Composite
 from lfc_compositor.models import Row
 from lfc_compositor.models import Widget
 
+from lfc.utils import render_to_json
+
 def change_width(request, id):
     """Changes the width of the column with passed id.
     """
     column = Column.objects.get(pk=id)
-    try:
-        width = request.POST.get("width")
-    except ValueError:
-        pass
+    width = request.POST.get("width", "")
+
+    if width:
+        try:
+            width = int(width)
+        except ValueError:
+            width = None
     else:
-        column.width = width
-        column.save()
+        width = None
+
+    column.width = width
+    column.save()
 
     composite = _get_composite(column)
     return HttpResponse(composite.render(request, edit=True))
@@ -42,7 +49,12 @@ def move_column(request, id):
     update_columns(column.parent)
 
     composite = _get_composite(column)
-    return HttpResponse(composite.render(request, edit=True))
+
+    html = (
+        ("#core-data-extra", composite.render(request, edit=True)),
+    )
+
+    return HttpResponse(render_to_json(html))
 
 def move_row(request, id):
     """Moves passed column to passed direction.
@@ -60,7 +72,12 @@ def move_row(request, id):
 
     composite = _get_composite(row)
     update_rows(composite)
-    return HttpResponse(composite.render(request, edit=True))
+
+    html = (
+        ("#core-data-extra", composite.render(request, edit=True)),
+    )
+
+    return HttpResponse(render_to_json(html))
 
 def move_widget(request, id):
     """Moves passed column to passed direction.
@@ -79,45 +96,89 @@ def move_widget(request, id):
     composite = _get_composite(widget)
     update_widgets(widget.parent)
 
-    return HttpResponse(composite.render(request, edit=True))
+    html = (
+        ("#core-data-extra", composite.render(request, edit=True)),
+    )
 
-def save_widget(request, id):
-    """Save the widget with the passed id. Data is passed via POST request.
-    """
-    widget = Widget.objects.get(pk=id)
-    widget = widget.get_content_object()
+    return HttpResponse(render_to_json(html))
 
-    form = widget.form(instance=widget, data = request.POST, files = request.FILES)
-
-    if form.is_valid():
-        form.save()
-
-    composite = _get_composite(widget)
-    return HttpResponse(composite.render(request, edit=True))
-
-def edit_widget_form(request, id, template="lfc_compositor/widgets/form.html"):
+def edit_widget(request, id, template="lfc_compositor/widgets/form.html"):
     """Returns the form of the widget with the id.
     """
     widget = Widget.objects.get(pk=id)
     widget = widget.get_content_object()
 
-    html = render_to_string(template, RequestContext(request, {
-        "form" : widget.form(instance=widget),
-        "widget" : widget,
-    }))
+    if request.method == "GET":
+        form = widget.form(instance=widget)
 
-    return HttpResponse(html)
+        try:
+            template = form.template
+        except AttributeError:
+            pass
+
+        result = render_to_string(template, RequestContext(request, {
+            "form" : form,
+            "widget" : widget,
+            "template" : template,
+        }))
+
+        html = (
+            ("#overlay .content", result),
+        )
+
+        return HttpResponse(render_to_json(html, open=True))
+
+    else:
+        form = widget.form(instance=widget, data = request.POST, files = request.FILES)
+
+        if form.is_valid():
+            form.save()
+
+            composite = _get_composite(widget)
+
+            html = (
+                ("#core-data-extra", composite.render(request, edit=True)),
+            )
+
+            return HttpResponse(render_to_json(html, close=True))
+        else:
+            result = render_to_string(template, RequestContext(request, {
+                "form" : form,
+                "widget" : widget,
+                "template" : template,
+            }))
+
+            html = (
+                ("#overlay .content", result),
+            )
+
+            return HttpResponse(render_to_json(html))
 
 def add_row(request, id):
     """Adds a row to the composite with passed id.
     """
     composite = Composite.objects.get(pk=id)
-
+    
     amount = Row.objects.filter(parent=composite).count()
-    row = Row.objects.create(parent=composite, position=amount*10)
+    
+    try:
+        position = int(request.REQUEST.get("position"))
+    except (ValueError, TypeError):
+        position = (amount+1) * 10
+    else:
+        position += 5
+
+    row = Row.objects.create(parent=composite, position=position)
+    
+    update_rows(composite)
+    
     Column.objects.create(parent=row, position=10)
 
-    return HttpResponse(composite.render(request, edit=True))
+    html = (
+        ("#core-data-extra", composite.render(request, edit=True)),
+    )
+
+    return HttpResponse(render_to_json(html))
 
 def add_column(request, id):
     """Adds a column to the row with passed id.
@@ -125,50 +186,82 @@ def add_column(request, id):
     row = Row.objects.get(pk=id)
 
     amount = Column.objects.filter(parent=row).count()
-    column = Column.objects.create(parent=row, position=amount*10)
+
+    try:
+        position = int(request.REQUEST.get("position"))
+    except (ValueError, TypeError):
+        position = (amount+1) * 10
+    else:
+        position += 5
+
+    column = Column.objects.create(parent=row, position=position)
     update_columns(column.parent)
     composite = _get_composite(row)
-    return HttpResponse(composite.render(request, edit=True))
 
-def add_widget_form(request, template="lfc_compositor/widgets/add_form.html"):
-    """Display the add form for a widget with passed type.
+    html = (
+        ("#core-data-extra", composite.render(request, edit=True)),
+    )
+
+    return HttpResponse(render_to_json(html))
+
+def add_widget(request, template="lfc_compositor/widgets/add_form.html"):
+    """Displays widget form and adds a widget.
     """
-    column_id = request.POST.get("column_id")
-    type = request.POST.get("type")
-    ct = ContentType.objects.filter(model=type)[0]
-    mc = ct.model_class()
-    form = mc().form()
-
-    html = render_to_string(template, RequestContext(request, {
-        "form" : form,
-        "column_id" : column_id,
-        "type" : type,
-    }))
-
-    return HttpResponse(html)
-
-def add_widget(request):
-    """Adds a widget.
-    """
-    column_id = request.POST.get("column_id")
+    # Get column
+    column_id = request.REQUEST.get("column_id")
     column = Column.objects.get(pk=column_id)
 
-    amount = Widget.objects.filter(parent=column).count()
-
-    type = request.POST.get("type")
+    # Get widget type's form
+    type = request.REQUEST.get("type")
     ct = ContentType.objects.filter(model=type)[0]
     mc = ct.model_class()
-    form = mc().form(data=request.POST, files=request.FILES)
 
-    widget = form.save(commit=False)
-    widget.parent = column
-    widget.position = amount*10
-    widget.save()
+    # Display widget form
+    if request.method == "GET":
+        form = mc().form()
+        result = render_to_string(template, RequestContext(request, {
+            "form" : form,
+            "column_id" : column_id,
+            "type" : type,
+        }))
 
-    update_widgets(column)
+        html = (("#overlay .content", result),)
 
-    composite = _get_composite(column)
-    return HttpResponse(composite.render(request, edit=True))
+        return HttpResponse(render_to_json(html, open=True))
+
+    # Save widget if form is valid
+    else:
+        amount = Widget.objects.filter(parent=column).count()
+        form = mc().form(data=request.POST, files=request.FILES)
+
+        if form.is_valid():
+            widget = form.save(commit=False)
+            widget.parent = column
+
+            widget.position = amount*10
+
+            widget.save()
+            update_widgets(column)
+
+            composite = _get_composite(column)
+
+            html = (
+                ("#core-data-extra", composite.render(request, edit=True)),
+            )
+
+            return HttpResponse(render_to_json(html, close=True))
+        else:
+            result = render_to_string(template, RequestContext(request, {
+                "form" : form,
+                "column_id" : column_id,
+                "type" : type,
+            }))
+
+            html = (
+                ("#overlay .content", result),
+            )
+
+            return HttpResponse(render_to_json(html))
 
 def delete_column(request, id):
     """Deletes the column with passed id
@@ -183,6 +276,11 @@ def delete_column(request, id):
         column.delete()
 
     update_columns(row)
+
+    html = (
+        ("#core-data-extra", composite.render(request, edit=True)),
+    )
+
     return HttpResponse(composite.render(request, edit=True))
 
 def delete_row(request, id):

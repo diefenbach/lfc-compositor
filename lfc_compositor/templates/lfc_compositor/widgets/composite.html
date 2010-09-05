@@ -2,9 +2,9 @@
 {{ content|safe }}
 {% if edit %}
     <div>
-        <a class="compositor-link" 
+        <a class="cp-link" 
            href="{% url compositor_add_row composite.id %}">
-           <img src="{{ MEDIA_URL }}lfc/icons/add.png" alt='{% trans "Add Row" %}' title='{% trans "Add Row" %}'/>           
+           <img src="{{ MEDIA_URL }}lfc_compositor/icons/add_row.png" alt='{% trans "Add Row" %}' title='{% trans "Add Row" %}'/>           
         </a>
     </div>
 {% endif %}

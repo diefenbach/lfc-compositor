@@ -15,6 +15,8 @@ from tagging.forms import TagField
 
 # compositor imports
 from lfc_compositor.config import LEFT
+from lfc_compositor.config import IMAGE_POSITIONS
+from lfc_compositor.config import COLUMN_CLASSES
 
 class Composite(BaseContent):
     """A composite can be added to the portal. A composite has only rows.
@@ -51,11 +53,11 @@ class Composite(BaseContent):
                 is_last = False
 
             content += row.render(request, edit, is_first, is_last)
-
+        
         return render_to_string("lfc_compositor/widgets/composite.html", RequestContext(request, {
             "composite" : self,
             "content" : content,
-            "edit" : edit,
+            "edit" : edit and (amount == -1),
         }))
 
     def form(self, **kwargs):
@@ -140,6 +142,7 @@ class Column(models.Model):
     """
     parent = models.ForeignKey(Row, verbose_name=_(u"Parent"), related_name="columns")
     position = models.IntegerField(default=1)
+    css_class = models.CharField(choices = COLUMN_CLASSES, blank=True, default="", max_length=20)
     width = models.IntegerField(blank=True, null=True)
 
     class Meta:
@@ -182,12 +185,9 @@ class Column(models.Model):
 
         columns = self.parent.columns.count()
 
-        width = 100 / columns
-
         return render_to_string("lfc_compositor/widgets/column.html", RequestContext(request, {
             "content" : content,
             "column" : self,
-            "width" : width,
             "edit" : edit,
             "deletable" : columns > 1,
             "first_col" : first_col,
@@ -329,7 +329,7 @@ class TextWithImageWidget(Widget):
     content = models.TextField(_(u"Text"), blank=True)
     image = ImageWithThumbsField(_(u"Image"), upload_to="uploads",
         sizes=((60, 60), (100, 100), (200, 200), (400, 400), (600, 600), (800, 800)))
-    image_position = models.IntegerField(_(u"Position"), default = LEFT)
+    image_position = models.IntegerField(_(u"Image Position"), choices = IMAGE_POSITIONS, default = LEFT)
     size = models.PositiveSmallIntegerField(_(u"Size"), choices=((0, "60x60"), (1, "100x100"), (2, "200x200"), (3, "400x400"), (4, "600x600"), (5, "800x800")), default=2)
 
     def get_searchable_text(self):
@@ -367,10 +367,10 @@ class ReferenceWidget(Widget):
     reference
         The referenced content object.
     """
-    reference = models.ForeignKey(BaseContent, verbose_name=_(u"Reference"), blank=True, null=True)
-    display_title = models.BooleanField(default=True)
-    display_link = models.BooleanField(default=False)
-    words = models.IntegerField(blank=True, null=True)
+    reference = models.ForeignKey(BaseContent, verbose_name=_(u"Reference"))
+    display_title = models.BooleanField(_(u"Display Title"), default=True)
+    display_link = models.BooleanField(_(u"Display More Link"), default=False)
+    words = models.IntegerField(_(u"Amount of Words"), blank=True, null=True)
 
     def get_searchable_text(self):
         try:
@@ -393,6 +393,7 @@ class ReferenceWidget(Widget):
         }))
 
 class ReferenceWidgetForm(forms.ModelForm):
+    template = "lfc_compositor/widgets/reference_form.html"
     class Meta:
         model = ReferenceWidget
         fields = ("reference", "words", "display_title", "display_link")

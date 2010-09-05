@@ -2,31 +2,33 @@
 {% if edit %}
     <div style="background-color: transparent">
 
+        <a class="cp-hover cp-delete-link"
+           id="row-{{ row.id }}"
+           href="{% url compositor_delete_row row.id %}">
+            <img src="{{ MEDIA_URL }}lfc_compositor/icons/delete_row.png" alt='{% trans "Delete Row" %}' title='{% trans "Delete Row" %}'/>
+        </a>
+
+        <a class="cp-hover cp-link" 
+           id="row-{{ row.id }}"
+           href="{% url compositor_add_row row.parent.id %}?position={{ row.position }}">
+           <img src="{{ MEDIA_URL }}lfc_compositor/icons/add_row.png" alt='{% trans "Add Row" %}' title='{% trans "Add Row" %}'/>
+        </a>
+
         {% if not first_row %}
-            <a class="cp-hover compositor-link"
+            <a class="cp-hover cp-link"
                id="row-{{ row.id }}"
                href="{% url compositor_move_row row.id %}?direction=0">
-               <img src="{{ MEDIA_URL }}lfc/icons/arrow_up.png" alt='{% trans "Up" %}' title='{% trans "Up" %}' />
+               <img src="{{ MEDIA_URL }}lfc/icons/arrow_up.png" alt='{% trans "Move Row Up" %}' title='{% trans "Move Row Up" %}' />
             </a>
         {% endif %}
 
         {% if not last_row %}
-            <a class="cp-hover compositor-link"
+            <a class="cp-hover cp-link"
                id="row-{{ row.id }}"
                href="{% url compositor_move_row row.id %}?direction=1">
-               <img src="{{ MEDIA_URL }}lfc/icons/arrow_down.png" alt='{% trans "Down" %}' title='{% trans "Down" %}' />
+               <img src="{{ MEDIA_URL }}lfc/icons/arrow_down.png" alt='{% trans "Move Row Down" %}' title='{% trans "Move Row Down" %}' />
             </a>
         {% endif %}
-
-        <a class="cp-hover compositor-link"
-           id="row-{{ row.id }}"
-           href="{% url compositor_delete_row row.id %}">
-            <img src="{{ MEDIA_URL }}lfc/icons/delete.png" alt='{% trans "Delete Row" %}' title='{% trans "Delete Row" %}'/>
-        </a>
-        <a class="compositor-link"
-           href="{% url compositor_add_column row.id %}">
-            <img src="{{ MEDIA_URL }}lfc/icons/add.png" alt='{% trans "Add Column" %}' title='{% trans "Add Column" %}'/>
-        </a>
     </div>
 {% endif %}
 <table class="row-{{ row.id }} lfc-compositor-default">

@@ -3,10 +3,10 @@
     {% if edit %}
         {% include "lfc_compositor/widgets/widget_navigation.html" %}
     {% endif %}
-
+    
     {% if IMAGE_LEFT  %}
-        <img alt="image" class="widget-{{ widget.id }} left" src="{{ image_url }}" /><p>{{ widget.content|safe }}</p>
+        <img alt="image" class="widget widget-{{ widget.id }} left" src="{{ image_url }}" /><p class="widget-{{ widget.id }}">{{ widget.content|safe }}</p>
     {% else %}
-        <img alt="image" class="widget-{{ widget.id }} right" src="{{ image_url }}" /><p>{{ widget.content|safe }}</p>
+        <img alt="image" class="widget widget-{{ widget.id }} right" src="{{ image_url }}" /><p class="widget-{{ widget.id }}">{{ widget.content|safe }}</p>
     {% endif %}
 </div>
