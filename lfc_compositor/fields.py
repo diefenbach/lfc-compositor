@@ -19,10 +19,9 @@ class ReferenceInput(forms.HiddenInput):
         super(ReferenceInput, self).__init__(attrs)
 
     def render(self, name, value, attrs=None):
-        
+        breadcrumbs = []
         if value:
             obj = BaseContent.objects.get(pk=value)
-            breadcrumbs = []
             temp = obj
             while temp is not None:
                 breadcrumbs.insert(0, temp)

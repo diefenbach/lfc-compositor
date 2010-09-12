@@ -345,7 +345,7 @@ class ImageWidget(Widget):
     def form(self, request, composite, **kwargs):
         """Returns the add/edit form of the widget.
         """
-        return ImageWidgetForm(**kwargs)
+        return ImageWidgetForm(request, composite, **kwargs)
 
     def render(self, request, edit=False, first_widget=False, last_widget=False):
         """Renders the widget as HTML.
@@ -395,7 +395,7 @@ class TextWithImageWidget(Widget):
     def form(self, request, composite, **kwargs):
         """Returns the add/edit form of the image widget.
         """
-        return TextWithImageWidgetForm(**kwargs)
+        return TextWithImageWidgetForm(request, composite, **kwargs)
 
     def render(self, request, edit=False, first_widget=False, last_widget=False):
         image_url = getattr(self.image, "url_%s" % self.get_size_display())
