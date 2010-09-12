@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
+from django.utils.translation import ugettext_lazy as _
 
 # compositor imports
 from lfc_compositor.models import Column
@@ -126,7 +127,7 @@ def edit_widget(request, id, template="lfc_compositor/widgets/form.html"):
             ("#overlay .content", result),
         )
 
-        return HttpResponse(render_to_json(html, open=True))
+        return HttpResponse(render_to_json(html, open_overlay=True))
 
     else:
         form = widget.form(instance=widget, data = request.POST, files = request.FILES)
@@ -140,7 +141,7 @@ def edit_widget(request, id, template="lfc_compositor/widgets/form.html"):
                 ("#core-data-extra", composite.render(request, edit=True)),
             )
 
-            return HttpResponse(render_to_json(html, close=True))
+            return HttpResponse(render_to_json(html, close_overlay=True))
         else:
             result = render_to_string(template, RequestContext(request, {
                 "form" : form,
@@ -158,9 +159,9 @@ def add_row(request, id):
     """Adds a row to the composite with passed id.
     """
     composite = Composite.objects.get(pk=id)
-    
+
     amount = Row.objects.filter(parent=composite).count()
-    
+
     try:
         position = int(request.REQUEST.get("position"))
     except (ValueError, TypeError):
@@ -169,9 +170,9 @@ def add_row(request, id):
         position += 5
 
     row = Row.objects.create(parent=composite, position=position)
-    
+
     update_rows(composite)
-    
+
     Column.objects.create(parent=row, position=10)
 
     html = (
@@ -227,7 +228,7 @@ def add_widget(request, template="lfc_compositor/widgets/add_form.html"):
 
         html = (("#overlay .content", result),)
 
-        return HttpResponse(render_to_json(html, open=True))
+        return HttpResponse(render_to_json(html, open_overlay=True))
 
     # Save widget if form is valid
     else:
@@ -249,7 +250,7 @@ def add_widget(request, template="lfc_compositor/widgets/add_form.html"):
                 ("#core-data-extra", composite.render(request, edit=True)),
             )
 
-            return HttpResponse(render_to_json(html, close=True))
+            return HttpResponse(render_to_json(html, close_overlay=True))
         else:
             result = render_to_string(template, RequestContext(request, {
                 "form" : form,
@@ -277,11 +278,14 @@ def delete_column(request, id):
 
     update_columns(row)
 
-    html = (
-        ("#core-data-extra", composite.render(request, edit=True)),
+    html = (("#core-data-extra", composite.render(request, edit=True)),)
+
+    json = render_to_json(
+        html = html,
+        message = _(u"Column has been deleted.")
     )
 
-    return HttpResponse(composite.render(request, edit=True))
+    return HttpResponse(json)
 
 def delete_row(request, id):
     """Deletes row with passed id.
@@ -295,7 +299,15 @@ def delete_row(request, id):
         row.delete()
 
     update_rows(composite)
-    return HttpResponse(composite.render(request, edit=True))
+
+    html = (("#core-data-extra", composite.render(request, edit=True)),)
+
+    json = render_to_json(
+        html = html,
+        message = _(u"Row has been deleted.")
+    )
+
+    return HttpResponse(json)
 
 def delete_widget(request, id):
     """Deletes the widget with the passed id.
@@ -308,7 +320,14 @@ def delete_widget(request, id):
         composite = _get_composite(widget)
         widget.delete()
 
-    return HttpResponse(composite.render(request, edit=True))
+    html = (("#core-data-extra", composite.render(request, edit=True)),)
+
+    json = render_to_json(
+        html = html,
+        message = _(u"Widget has been deleted.")
+    )
+
+    return HttpResponse(json)
 
 def _get_composite(obj):
     composite = obj

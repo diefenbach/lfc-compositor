@@ -2,20 +2,20 @@
 {% if edit %}
     <div style="background-color: transparent">
 
-        <a class="cp-hover cp-delete-link"
+        <a class="cp-hover delete-link"
            id="row-{{ row.id }}"
            href="{% url compositor_delete_row row.id %}">
             <img src="{{ MEDIA_URL }}lfc_compositor/icons/delete_row.png" alt='{% trans "Delete Row" %}' title='{% trans "Delete Row" %}'/>
         </a>
 
-        <a class="cp-hover cp-link" 
+        <a class="cp-hover ajax-link" 
            id="row-{{ row.id }}"
            href="{% url compositor_add_row row.parent.id %}?position={{ row.position }}">
            <img src="{{ MEDIA_URL }}lfc_compositor/icons/add_row.png" alt='{% trans "Add Row" %}' title='{% trans "Add Row" %}'/>
         </a>
 
         {% if not first_row %}
-            <a class="cp-hover cp-link"
+            <a class="cp-hover ajax-link"
                id="row-{{ row.id }}"
                href="{% url compositor_move_row row.id %}?direction=0">
                <img src="{{ MEDIA_URL }}lfc/icons/arrow_up.png" alt='{% trans "Move Row Up" %}' title='{% trans "Move Row Up" %}' />
@@ -23,7 +23,7 @@
         {% endif %}
 
         {% if not last_row %}
-            <a class="cp-hover cp-link"
+            <a class="cp-hover ajax-link"
                id="row-{{ row.id }}"
                href="{% url compositor_move_row row.id %}?direction=1">
                <img src="{{ MEDIA_URL }}lfc/icons/arrow_down.png" alt='{% trans "Move Row Down" %}' title='{% trans "Move Row Down" %}' />

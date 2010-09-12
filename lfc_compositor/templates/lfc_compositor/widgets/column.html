@@ -4,28 +4,28 @@
     {% if edit %}
         <div style="clear: both">
             {% if deletable %}
-                <a class="cp-hover cp-delete-link"
+                <a class="cp-hover delete-link"
                    id="column-{{ column.id }}"
                    href="{% url compositor_delete_column column.id %}">
                     <img src="{{ MEDIA_URL }}lfc_compositor/icons/delete_column.png" alt='{% trans "Delete Column" %}' title='{% trans "Delete Column" %}'/>
                 </a>
             {% endif %}
 
-            <a class="cp-hover cp-link"
+            <a class="cp-hover ajax-link"
                id="column-{{ column.id }}"
                href="{% url compositor_add_column column.parent.id %}?position={{ column.position }}">
                 <img src="{{ MEDIA_URL }}lfc_compositor/icons/add_column.png" alt='{% trans "Add Column" %}' title='{% trans "Add Column" %}'/>
             </a>
             
             {% if not first_col %}
-                <a class="cp-hover cp-link"
+                <a class="cp-hover ajax-link"
                    id="column-{{ column.id }}"
                    href="{% url compositor_move_column column.id %}?direction=0">
                     <img src="{{ MEDIA_URL }}lfc/icons/arrow_left.png" alt='{% trans "Move Column Left" %}' title='{% trans "Move Column Left" %}' />
                 </a>                
             {% endif %}
             {% if not last_col %}
-                <a class="cp-hover cp-link"
+                <a class="cp-hover ajax-link"
                    id="column-{{ column.id }}"
                    href="{% url compositor_move_column column.id %}?direction=1">
                     <img src="{{ MEDIA_URL }}lfc/icons/arrow_right.png" alt='{% trans "Move Column Right" %}' title='{% trans "Move Column Right" %}' />
@@ -49,7 +49,7 @@
             </select>
 
             <input type="hidden" name="column_id" value="{{ column.id }}">
-            <input class="cp-button" type="submit" value='{% trans "Add Widget" %}' />
+            <input class="ajax-submit" type="submit" value='{% trans "Add Widget" %}' />
         </form>
     {% else %}
         {{ content|safe }}
