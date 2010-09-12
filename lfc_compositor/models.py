@@ -53,7 +53,7 @@ class Composite(BaseContent):
                 is_last = False
 
             content += row.render(request, edit, is_first, is_last)
-        
+
         return render_to_string("lfc_compositor/widgets/composite.html", RequestContext(request, {
             "composite" : self,
             "content" : content,
@@ -129,7 +129,7 @@ class Row(models.Model):
             "content" : content,
             "edit" : edit,
             "first_row" : first_row,
-            "last_row" : last_row,            
+            "last_row" : last_row,
         }))
 
 class Column(models.Model):
@@ -167,7 +167,7 @@ class Column(models.Model):
         """
         widgets = self.get_widgets()
         amount = len(widgets)-1
-        
+
         content = ""
         for i, widget in enumerate(widgets):
 
@@ -180,7 +180,7 @@ class Column(models.Model):
                 last_widget = True
             else:
                 last_widget = False
-            
+
             content += widget.render(request, edit, first_widget, last_widget)
 
         columns = self.parent.columns.count()
@@ -275,7 +275,7 @@ class TextWidget(Widget):
         return render_to_string("lfc_compositor/widgets/text.html", RequestContext(request, {
             "widget" : self,
             "edit" : edit,
-            "first_widget" : first_widget, 
+            "first_widget" : first_widget,
             "last_widget" : last_widget,
         }))
 
@@ -309,8 +309,8 @@ class ImageWidget(Widget):
             "widget" : self,
             "image_url" : image_url,
             "edit" : edit,
-            "first_widget" : first_widget, 
-            "last_widget" : last_widget,            
+            "first_widget" : first_widget,
+            "last_widget" : last_widget,
         }))
 
 class ImageWidgetForm(forms.ModelForm):
@@ -347,8 +347,8 @@ class TextWithImageWidget(Widget):
             "image_url" : image_url,
             "IMAGE_LEFT" : self.image_position == LEFT,
             "edit" : edit,
-            "first_widget" : first_widget, 
-            "last_widget" : last_widget,            
+            "first_widget" : first_widget,
+            "last_widget" : last_widget,
         }))
 
 class TextWithImageWidgetForm(forms.ModelForm):
@@ -388,12 +388,24 @@ class ReferenceWidget(Widget):
         return render_to_string("lfc_compositor/widgets/reference.html", RequestContext(request, {
             "widget" : self,
             "edit" : edit,
-            "first_widget" : first_widget, 
-            "last_widget" : last_widget,            
+            "first_widget" : first_widget,
+            "last_widget" : last_widget,
         }))
 
 class ReferenceWidgetForm(forms.ModelForm):
     template = "lfc_compositor/widgets/reference_form.html"
+
+    def __init__(self, *args, **kwargs):
+        composite = kwargs.get("composite")
+        del kwargs["composite"]
+
+        super(ReferenceWidgetForm, self).__init__(*args, **kwargs)
+
+        choices = [("", "-----")]
+        choices.extend([(o.id, o.title) for o in BaseContent.objects.exclude(pk=composite.basecontent_ptr_id)])
+
+        self.fields["reference"].choices = choices
+
     class Meta:
         model = ReferenceWidget
         fields = ("reference", "words", "display_title", "display_link")
