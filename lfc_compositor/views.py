@@ -108,9 +108,10 @@ def edit_widget(request, id, template="lfc_compositor/widgets/form.html"):
     """
     widget = Widget.objects.get(pk=id)
     widget = widget.get_content_object()
+    composite = _get_composite(widget)
 
     if request.method == "GET":
-        form = widget.form(instance=widget)
+        form = widget.form(instance=widget, composite=composite)
 
         try:
             template = form.template
@@ -130,12 +131,10 @@ def edit_widget(request, id, template="lfc_compositor/widgets/form.html"):
         return HttpResponse(render_to_json(html, open_overlay=True))
 
     else:
-        form = widget.form(instance=widget, data = request.POST, files = request.FILES)
+        form = widget.form(instance=widget, data = request.POST, files = request.FILES, composite=composite)
 
         if form.is_valid():
             form.save()
-
-            composite = _get_composite(widget)
 
             html = (
                 ("#core-data-extra", composite.render(request, edit=True)),
@@ -211,6 +210,7 @@ def add_widget(request, template="lfc_compositor/widgets/add_form.html"):
     # Get column
     column_id = request.REQUEST.get("column_id")
     column = Column.objects.get(pk=column_id)
+    composite = _get_composite(column)
 
     # Get widget type's form
     type = request.REQUEST.get("type")
@@ -219,7 +219,7 @@ def add_widget(request, template="lfc_compositor/widgets/add_form.html"):
 
     # Display widget form
     if request.method == "GET":
-        form = mc().form()
+        form = mc().form(composite=composite)
         result = render_to_string(template, RequestContext(request, {
             "form" : form,
             "column_id" : column_id,
@@ -233,7 +233,7 @@ def add_widget(request, template="lfc_compositor/widgets/add_form.html"):
     # Save widget if form is valid
     else:
         amount = Widget.objects.filter(parent=column).count()
-        form = mc().form(data=request.POST, files=request.FILES)
+        form = mc().form(data=request.POST, files=request.FILES, composite=composite)
 
         if form.is_valid():
             widget = form.save(commit=False)
@@ -243,8 +243,6 @@ def add_widget(request, template="lfc_compositor/widgets/add_form.html"):
 
             widget.save()
             update_widgets(column)
-
-            composite = _get_composite(column)
 
             html = (
                 ("#core-data-extra", composite.render(request, edit=True)),
