@@ -66,7 +66,7 @@ class Composite(BaseContent):
         return CompositeForm(**kwargs)
 
 class CompositeForm(forms.ModelForm):
-    """
+    """The form to create/edit a composite.
     """
     tags = TagField(widget=AutoCompleteTagInput(), required=False)
 
@@ -80,7 +80,7 @@ class CompositeForm(forms.ModelForm):
 class Row(models.Model):
     """A row for composite. A row can have multiple columns.
 
-    **Parameters**:
+    **Parameters:**
 
     parent
         The composite the of the row.
@@ -96,11 +96,13 @@ class Row(models.Model):
         return "Row %s" % self.id
 
     def get_columns(self):
-        """Returns the rows of the composite.
+        """Returns the columns of the row.
         """
         return self.columns.all()
 
     def get_searchable_text(self):
+        """Returns the searchable text of the row.
+        """
         searchable_text = ""
         for col in self.get_columns():
             searchable_text += " " + col.get_searchable_text()
@@ -108,6 +110,19 @@ class Row(models.Model):
         return searchable_text.strip()
 
     def render(self, request, edit=False, first_row=False, last_row=False):
+        """Renders the row.
+
+        **Parameters:**
+
+        edit
+            If True the edit icons will be displayed.
+
+        first_row
+            If True this row is the first one of the composite.
+
+        last_row
+            If True this row is the last one of the composite.
+        """
         columns = self.get_columns()
         amount = len(columns) - 1
         content = ""
@@ -133,9 +148,9 @@ class Row(models.Model):
         }))
 
 class Column(models.Model):
-    """A column can have serveral widgets.
+    """A column can have several widgets.
 
-    **Parameters**:
+    **Parameters:**
 
     parent
         The composite the of the row.
@@ -149,7 +164,7 @@ class Column(models.Model):
         ordering = ("position", )
 
     def get_searchable_text(self):
-        """
+        """Returns the searchable text of the column.
         """
         searchable_text = ""
         for widget in self.get_widgets():
@@ -158,7 +173,7 @@ class Column(models.Model):
         return searchable_text.strip()
 
     def get_widgets(self):
-        """
+        """Returns the widgets of the column.
         """
         return self.widgets.order_by("position")
 
@@ -194,11 +209,24 @@ class Column(models.Model):
             "last_col" : last_col,
         }))
 
+class WidgetForm(forms.ModelForm):
+    """The base class for all widget forms
+
+    **Parameters:**
+
+    template
+        The template with which the form will be rendered. If None the default
+        template will be used.
+    """
+    template = None
+    def __init__(self, request, composite, **kwargs):
+        super(WidgetForm, self).__init__(**kwargs)
+
 class Widget(models.Model):
     """A widget is a piece of content within a Composite. This class is the
     base class for all widgets of composite.
 
-    **Parameters**:
+    **Parameters:**
 
     parent
         The composite the of the row.
@@ -217,7 +245,7 @@ class Widget(models.Model):
         ordering = ("position", )
 
     def save(self, force_insert=False, force_update=False):
-        """
+        """Overwritten to update the searchable text of widgets
         """
         if self.content_type == "":
             self.content_type = self.__class__.__name__.lower()
@@ -242,18 +270,27 @@ class Widget(models.Model):
         else:
             return self
 
+    def form(self, composite):
+        """Returns the add/edit form of the widget. This must be overridden
+        by sub classes
+        """
+        raise NotImplementedError, "form has to be implemented by sub classed"
+
     def get_searchable_text(self):
-        """Returns the searchable text of the widget.
+        """Returns the searchable text of the widget. This should be
+        overwritten by sub classes.
         """
         return ""
 
     def render(self, request, edit=False, first_widget=False, last_widget=False):
+        """Renders the widget as HTML.
+        """
         return self.get_content_object().render(request, edit, first_widget, last_widget)
 
 class TextWidget(Widget):
     """A simple text widget.
 
-    **Parameters**:
+    **Parameters:**
 
     parent
         The composite the of the row.
@@ -264,14 +301,18 @@ class TextWidget(Widget):
     content = models.TextField(_(u"Text"), blank=True)
 
     def get_searchable_text(self):
+        """Returns the searchable text of this widget.
+        """
         return self.content
 
-    def form(self, **kwargs):
-        """Returns the add/edit form of the text widget.
+    def form(self, request, composite, **kwargs):
+        """Returns the add/edit form of the widget.
         """
-        return TextWidgetForm(**kwargs)
+        return TextWidgetForm(request, composite, **kwargs)
 
     def render(self, request, edit=False, first_widget=False, last_widget=False):
+        """Renders the widget as HTML.
+        """
         return render_to_string("lfc_compositor/widgets/text.html", RequestContext(request, {
             "widget" : self,
             "edit" : edit,
@@ -279,7 +320,9 @@ class TextWidget(Widget):
             "last_widget" : last_widget,
         }))
 
-class TextWidgetForm(forms.ModelForm):
+class TextWidgetForm(WidgetForm):
+    """The form for TextWidget.
+    """
     class Meta:
         model = TextWidget
         fields = ("content", )
@@ -287,7 +330,10 @@ class TextWidgetForm(forms.ModelForm):
 class ImageWidget(Widget):
     """An simple image widget.
 
-    **Parameters**:
+    **Parameters:**
+
+    size
+        The displayed size of the image.
 
     image
         The image file of the ImageWidget.
@@ -296,8 +342,8 @@ class ImageWidget(Widget):
     image = ImageWithThumbsField(_(u"Image"), upload_to="uploads",
         sizes=((60, 60), (100, 100), (200, 200), (400, 400), (600, 600), (800, 800)))
 
-    def form(self, **kwargs):
-        """Returns the add/edit form of the image widget.
+    def form(self, request, composite, **kwargs):
+        """Returns the add/edit form of the widget.
         """
         return ImageWidgetForm(**kwargs)
 
@@ -313,7 +359,9 @@ class ImageWidget(Widget):
             "last_widget" : last_widget,
         }))
 
-class ImageWidgetForm(forms.ModelForm):
+class ImageWidgetForm(WidgetForm):
+    """The form for ImageWidgetForm.
+    """
     class Meta:
         model = ImageWidget
         fields = ("size", "image", )
@@ -321,10 +369,19 @@ class ImageWidgetForm(forms.ModelForm):
 class TextWithImageWidget(Widget):
     """A text with a image widget. The image can be at the left or right site.
 
-    **Parameters**:
+    **Parameters:**
+
+    content
+        The text part of the widget.
+
+    image
+        The image file of the ImageWidget.
 
     image_position
         The position of the image: left, right.
+
+    size
+        The displayed size of the image.
     """
     content = models.TextField(_(u"Text"), blank=True)
     image = ImageWithThumbsField(_(u"Image"), upload_to="uploads",
@@ -335,7 +392,7 @@ class TextWithImageWidget(Widget):
     def get_searchable_text(self):
         return self.content
 
-    def form(self, **kwargs):
+    def form(self, request, composite, **kwargs):
         """Returns the add/edit form of the image widget.
         """
         return TextWithImageWidgetForm(**kwargs)
@@ -351,21 +408,32 @@ class TextWithImageWidget(Widget):
             "last_widget" : last_widget,
         }))
 
-class TextWithImageWidgetForm(forms.ModelForm):
+class TextWithImageWidgetForm(WidgetForm):
+    """The form for the TextWithImageWidget.
+    """
     class Meta:
         model = TextWithImageWidget
         fields = ("image", "size",  "image_position", "content")
 
+from lfc_compositor.fields import ReferenceInput
+
 class ReferenceWidget(Widget):
     """A widget to display existing content.
 
-    **Parameters**:
-
-    parent
-        The composite the of the row.
+    **Parameters:**
 
     reference
         The referenced content object.
+
+    display_title
+        If True the title of the reference will be displayed.
+
+    display_link
+        If True a "more" link to the referenced object will be displayed.
+
+    words
+        The amount of words which will be displayed form the referenced
+        content object.
     """
     reference = models.ForeignKey(BaseContent, verbose_name=_(u"Reference"))
     display_title = models.BooleanField(_(u"Display Title"), default=True)
@@ -378,10 +446,10 @@ class ReferenceWidget(Widget):
         except AttributeError:
             return ""
 
-    def form(self, **kwargs):
+    def form(self, request, composite, **kwargs):
         """Returns the add/edit form of the text widget.
         """
-        return ReferenceWidgetForm(**kwargs)
+        return ReferenceWidgetForm(request, composite, **kwargs)
 
     def render(self, request, edit=False, first_widget=False, last_widget=False):
         # content = self.reference.get_content_object()
@@ -392,19 +460,20 @@ class ReferenceWidget(Widget):
             "last_widget" : last_widget,
         }))
 
-class ReferenceWidgetForm(forms.ModelForm):
-    template = "lfc_compositor/widgets/reference_form.html"
-
-    def __init__(self, *args, **kwargs):
-        composite = kwargs.get("composite")
-        del kwargs["composite"]
-
-        super(ReferenceWidgetForm, self).__init__(*args, **kwargs)
+class ReferenceWidgetForm(WidgetForm):
+    """The form of the ReferenceWidget.
+    """
+    def __init__(self, request, composite, **kwargs):
+        """Overriden in order to exclude the parent composite within the
+        referencalbe objects.
+        """
+        super(ReferenceWidgetForm, self).__init__(request, composite, **kwargs)
 
         choices = [("", "-----")]
         choices.extend([(o.id, o.title) for o in BaseContent.objects.exclude(pk=composite.basecontent_ptr_id)])
 
         self.fields["reference"].choices = choices
+        self.fields["reference"].widget = ReferenceInput(request, composite)
 
     class Meta:
         model = ReferenceWidget

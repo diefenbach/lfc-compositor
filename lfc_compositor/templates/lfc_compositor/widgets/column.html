@@ -32,7 +32,7 @@
                 </a>
             {% endif %}
             <input type="text"
-                   style="width:40px"
+                   style="width:40px; margin: 3px 0; position: relative; top:-3px"
                    {% if column.width %}value="{{ column.width }}{% endif %}"
                    data="{% url compositor_change_width column.id %}"
                    class="cp-width" />

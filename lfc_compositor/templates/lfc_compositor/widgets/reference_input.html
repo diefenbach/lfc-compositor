@@ -1,0 +1,30 @@
+{% load i18n %}
+
+<div class="cp-breadcrumbs">
+    <span>{% trans "Your are here" %}:</span>
+    <a class="ajax-link" href="{% url compositor_load_object 0 %}?composite={{ composite_id }}">{% trans "Portal" %}</a>
+    {% for breadcrumb in breadcrumbs %}
+        &gt; <a class="ajax-link" href="{% url compositor_load_object breadcrumb.id %}?composite={{ composite_id }}">{{ breadcrumb.title }}</a>
+    {% endfor %}
+</div>
+
+<div style="height:200px; width:400px; overflow:auto; border:1px solid #aaa; padding: 5px">
+    <table>
+        {% for child in children %}
+            <tr>
+                <td style="width:20px">
+                    {% ifnotequal child.id composite_id %}
+                        <input type="radio" name="reference" value="{{ child.id }}"/>
+                    {% endifnotequal %}
+                </td>
+                <td>
+                    {% if child.has_children %}
+                        <a class="ajax-link" href="{% url compositor_load_object child.id %}?composite={{ composite_id }}">{{ child.title }}</a>
+                    {% else %}
+                        <span>{{ child.title }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>

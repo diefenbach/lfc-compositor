@@ -6,6 +6,10 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext_lazy as _
 
+# lfc imports
+import lfc.utils
+from lfc.models import BaseContent
+
 # compositor imports
 from lfc_compositor.models import Column
 from lfc_compositor.models import Composite
@@ -13,6 +17,38 @@ from lfc_compositor.models import Row
 from lfc_compositor.models import Widget
 
 from lfc.utils import render_to_json
+
+def load_object(request, id, template="lfc_compositor/widgets/reference_input.html"):
+    """
+    """
+    try:
+        composite_id = int(request.GET.get("composite"))
+    except ValueError, TypeError:
+        composite_id = None
+
+    breadcrumbs = []
+    try:
+        obj = BaseContent.objects.get(pk=id)
+    except (BaseContent.DoesNotExist, ValueError):
+        obj = lfc.utils.get_portal()
+    else:
+        temp = obj
+        while temp is not None:
+            breadcrumbs.insert(0, temp)
+            temp = temp.parent
+
+    html = render_to_string(template, RequestContext(request, {
+        "obj" : obj,
+        "breadcrumbs" : breadcrumbs,
+        "children" : obj.get_children(),
+        "composite_id" : composite_id,
+    }))
+
+    html = (
+        ("#reference-input", html),
+    )
+
+    return HttpResponse(render_to_json(html))
 
 def change_width(request, id):
     """Changes the width of the column with passed id.
@@ -111,10 +147,11 @@ def edit_widget(request, id, template="lfc_compositor/widgets/form.html"):
     composite = _get_composite(widget)
 
     if request.method == "GET":
-        form = widget.form(instance=widget, composite=composite)
+        form = widget.form(request, composite, instance=widget)
 
         try:
-            template = form.template
+            if form.template:
+                template = form.template
         except AttributeError:
             pass
 
@@ -131,7 +168,7 @@ def edit_widget(request, id, template="lfc_compositor/widgets/form.html"):
         return HttpResponse(render_to_json(html, open_overlay=True))
 
     else:
-        form = widget.form(instance=widget, data = request.POST, files = request.FILES, composite=composite)
+        form = widget.form(request, composite, instance=widget, data = request.POST, files = request.FILES)
 
         if form.is_valid():
             form.save()
@@ -219,7 +256,7 @@ def add_widget(request, template="lfc_compositor/widgets/add_form.html"):
 
     # Display widget form
     if request.method == "GET":
-        form = mc().form(composite=composite)
+        form = mc().form(request, composite)
         result = render_to_string(template, RequestContext(request, {
             "form" : form,
             "column_id" : column_id,
@@ -233,7 +270,7 @@ def add_widget(request, template="lfc_compositor/widgets/add_form.html"):
     # Save widget if form is valid
     else:
         amount = Widget.objects.filter(parent=column).count()
-        form = mc().form(data=request.POST, files=request.FILES, composite=composite)
+        form = mc().form(request, composite, data=request.POST, files=request.FILES)
 
         if form.is_valid():
             widget = form.save(commit=False)

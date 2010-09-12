@@ -5,13 +5,11 @@
 
     <h1>{% trans "Add Widget" %}</h1>
 
-    <table>
-        {% include "lfc/manage/lfc_form.html" %}
-    </table>
-    
+    {% include "lfc/manage/lfc_form.html" %}
+
     <input type="hidden" name="type" value="{{ type }}" />
     <input type="hidden" name="column_id" value="{{ column_id }}" />
-    
+
     <input class="ajax-submit"
            type="submit" />
 </form>
@@ -19,5 +17,5 @@
 <script>
     $(function() {
         $("#id_content").cleditor();
-    })    
+    })
 </script>
