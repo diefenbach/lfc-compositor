@@ -17,6 +17,6 @@ urlpatterns = patterns('lfc_compositor.views',
     url(r'^move-widget/(?P<id>\d*)$', "move_widget", name="compositor_move_widget"),
     url(r'^change-width/(?P<id>\d*)$', "change_width", name="compositor_change_width"),
 
-    url(r'^reference-load-object/(?P<id>\d*)$', "load_object", name="compositor_load_object"),
+    url(r'^reference-load-reference/(?P<id>\d*)$', "load_reference", name="compositor_load_reference"),
 
 )
