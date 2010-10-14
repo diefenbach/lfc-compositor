@@ -74,7 +74,7 @@ class CompositeForm(forms.ModelForm):
         model = Composite
         fields = ("title", "display_title", "slug", "tags")
 
-    def extra(self, request):
+    def below_form(self, request):
         return self.instance.render(request, True)
 
 class Row(models.Model):

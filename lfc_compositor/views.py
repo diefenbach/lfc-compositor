@@ -92,7 +92,7 @@ def move_column(request, id):
     update_columns(column.parent)
 
     html = (
-        ("#core-data-extra", composite.render(request, edit=True)),
+        ("#core-data-below-form", composite.render(request, edit=True)),
     )
 
     return HttpResponse(render_to_json(html))
@@ -117,7 +117,7 @@ def move_row(request, id):
     update_rows(composite)
 
     html = (
-        ("#core-data-extra", composite.render(request, edit=True)),
+        ("#core-data-below-form", composite.render(request, edit=True)),
     )
 
     return HttpResponse(render_to_json(html))
@@ -142,7 +142,7 @@ def move_widget(request, id):
     update_widgets(widget.parent)
 
     html = (
-        ("#core-data-extra", composite.render(request, edit=True)),
+        ("#core-data-below-form", composite.render(request, edit=True)),
     )
 
     return HttpResponse(render_to_json(html))
@@ -169,7 +169,7 @@ def add_row(request, id):
     Column.objects.create(parent=row, position=10)
 
     html = (
-        ("#core-data-extra", composite.render(request, edit=True)),
+        ("#core-data-below-form", composite.render(request, edit=True)),
     )
 
     return HttpResponse(render_to_json(html))
@@ -195,7 +195,7 @@ def add_column(request, id):
     
 
     html = (
-        ("#core-data-extra", composite.render(request, edit=True)),
+        ("#core-data-below-form", composite.render(request, edit=True)),
     )
 
     return HttpResponse(render_to_json(html))
@@ -242,7 +242,7 @@ def add_widget(request, template="lfc_compositor/widgets/add_form.html"):
             update_widgets(column)
 
             html = (
-                ("#core-data-extra", composite.render(request, edit=True)),
+                ("#core-data-below-form", composite.render(request, edit=True)),
             )
 
             return HttpJsonResponse(html, close_overlay=True)
@@ -292,7 +292,7 @@ def edit_widget(request, id, template="lfc_compositor/widgets/form.html"):
         if form.is_valid():
             form.save()
             composite = (
-                ["#core-data-extra", composite.render(request, edit=True)],
+                ["#core-data-below-form", composite.render(request, edit=True)],
             )
             return HttpJsonResponse(
                 content = composite, 
@@ -322,7 +322,7 @@ def delete_column(request, id):
 
     update_columns(row)
 
-    html = (("#core-data-extra", composite.render(request, edit=True)),)
+    html = (("#core-data-below-form", composite.render(request, edit=True)),)
 
     json = render_to_json(
         html = html,
@@ -345,7 +345,7 @@ def delete_row(request, id):
 
     update_rows(composite)
 
-    html = (("#core-data-extra", composite.render(request, edit=True)),)
+    html = (("#core-data-below-form", composite.render(request, edit=True)),)
 
     json = render_to_json(
         html = html,
@@ -366,7 +366,7 @@ def delete_widget(request, id):
         composite.check_permission(request.user, "edit")
         widget.delete()
 
-    html = (("#core-data-extra", composite.render(request, edit=True)),)
+    html = (("#core-data-below-form", composite.render(request, edit=True)),)
 
     json = render_to_json(
         html = html,
