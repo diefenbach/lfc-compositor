@@ -211,14 +211,7 @@ class Column(models.Model):
 
 class WidgetForm(forms.ModelForm):
     """The base class for all widget forms
-
-    **Parameters:**
-
-    template
-        The template with which the form will be rendered. If None the default
-        template will be used.
     """
-    template = None
     def __init__(self, request, composite, **kwargs):
         super(WidgetForm, self).__init__(**kwargs)
 
@@ -240,7 +233,7 @@ class Widget(models.Model):
     parent = models.ForeignKey(Column, verbose_name=_(u"Column"), related_name="widgets")
     position = models.IntegerField(_(u"Position"), blank=True, null=True)
     content_type = models.CharField(blank=True, max_length=100)
-
+    
     class Meta:
         ordering = ("position", )
 
@@ -270,7 +263,7 @@ class Widget(models.Model):
         else:
             return self
 
-    def form(self, composite):
+    def form(self, request, composite, **kwargs):
         """Returns the add/edit form of the widget. This must be overridden
         by sub classes
         """
