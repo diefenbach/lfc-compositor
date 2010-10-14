@@ -60,7 +60,7 @@ class Composite(BaseContent):
             "edit" : edit and (amount == -1),
         }))
 
-    def form(self, **kwargs):
+    def edit_form(self, **kwargs):
         """Returns the add/edit form of the page.
         """
         return CompositeForm(**kwargs)
