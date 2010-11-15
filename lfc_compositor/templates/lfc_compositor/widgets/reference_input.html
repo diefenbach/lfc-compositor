@@ -14,7 +14,7 @@
             <tr>
                 <td style="width:20px">
                     {% ifnotequal child.id composite_id %}
-                        <input type="radio" name="reference" value="{{ child.id }}"/>
+                        <input {% ifequal child.id obj.id %}checked="checked"{% endifequal %} type="radio" name="reference" value="{{ child.id }}"/>
                     {% endifnotequal %}
                 </td>
                 <td>

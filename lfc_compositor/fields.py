@@ -25,19 +25,24 @@ class ReferenceInput(forms.HiddenInput):
             temp = obj
             while temp is not None:
                 breadcrumbs.insert(0, temp)
-                temp = temp.parent            
-        else:    
+                temp = temp.parent
+        else:
             obj = lfc.utils.get_portal()
-        
+
+        if obj.parent:
+            children = obj.parent.get_children(self.request)
+        else:
+            children = lfc.utils.get_portal().get_children(self.request)
+
         html = """<div id="reference-input">"""
         html += render_to_string("lfc_compositor/widgets/reference_input.html", RequestContext(self.request, {
             "obj" : obj,
-            "children" : obj.get_children(),
+            "children" : children,
             "composite_id" : self.composite.id,
             "value" : value,
-            "breadcrumbs" : breadcrumbs,
+            "breadcrumbs" : breadcrumbs[:-1],
         }))
 
         html += "</div>"
-        
+
         return html

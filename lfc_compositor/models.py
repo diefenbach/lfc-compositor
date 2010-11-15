@@ -17,6 +17,7 @@ from tagging.forms import TagField
 from lfc_compositor.config import LEFT
 from lfc_compositor.config import IMAGE_POSITIONS
 from lfc_compositor.config import COLUMN_CLASSES
+from lfc_compositor.fields import ReferenceInput
 
 class Composite(BaseContent):
     """A composite can be added to the portal. A composite has only rows.
@@ -407,8 +408,6 @@ class TextWithImageWidgetForm(WidgetForm):
     class Meta:
         model = TextWithImageWidget
         fields = ("image", "size",  "image_position", "content")
-
-from lfc_compositor.fields import ReferenceInput
 
 class ReferenceWidget(Widget):
     """A widget to display existing content.

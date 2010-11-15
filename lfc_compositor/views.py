@@ -41,7 +41,7 @@ def load_reference(request, id, template="lfc_compositor/widgets/reference_input
     html = render_to_string(template, RequestContext(request, {
         "obj" : obj,
         "breadcrumbs" : breadcrumbs,
-        "children" : obj.get_children(),
+        "children" : obj.get_children(request),
         "composite_id" : composite_id,
     }))
 
