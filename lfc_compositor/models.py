@@ -9,6 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from lfc.fields.autocomplete import AutoCompleteTagInput
 from lfc.fields.thumbs import ImageWithThumbsField
 from lfc.models import BaseContent
+from lfc.settings import IMAGE_SIZES
 
 # tagging imports
 from tagging.forms import TagField
@@ -334,7 +335,7 @@ class ImageWidget(Widget):
     """
     size = models.PositiveSmallIntegerField(_(u"Size"), choices=((0, "60x60"), (1, "100x100"), (2, "200x200"), (3, "400x400"), (4, "600x600"), (5, "800x800")), default=2)
     image = ImageWithThumbsField(_(u"Image"), upload_to="uploads",
-        sizes=((60, 60), (100, 100), (200, 200), (400, 400), (600, 600), (800, 800)))
+        sizes=IMAGE_SIZES)
 
     def form(self, request, composite, **kwargs):
         """Returns the add/edit form of the widget.
@@ -379,7 +380,7 @@ class TextWithImageWidget(Widget):
     """
     content = models.TextField(_(u"Text"), blank=True)
     image = ImageWithThumbsField(_(u"Image"), upload_to="uploads",
-        sizes=((60, 60), (100, 100), (200, 200), (400, 400), (600, 600), (800, 800)))
+        sizes=IMAGE_SIZES)
     image_position = models.IntegerField(_(u"Image Position"), choices = IMAGE_POSITIONS, default = LEFT)
     size = models.PositiveSmallIntegerField(_(u"Size"), choices=((0, "60x60"), (1, "100x100"), (2, "200x200"), (3, "400x400"), (4, "600x600"), (5, "800x800")), default=2)
 
