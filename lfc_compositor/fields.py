@@ -28,10 +28,10 @@ class ReferenceInput(forms.HiddenInput):
                 temp = temp.parent
         else:
             obj = lfc.utils.get_portal()
-
-        if obj.parent:
+        
+        try:    
             children = obj.parent.get_children(self.request)
-        else:
+        except AttributeError:
             children = lfc.utils.get_portal().get_children(self.request)
 
         html = """<div id="reference-input">"""
