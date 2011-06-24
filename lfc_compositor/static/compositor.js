@@ -3,7 +3,7 @@ $(function() {
         var url = $(this).attr("data");
         var value = $(this).attr("value");
         $.post(url, { "width" : value }, function(data) {
-            $("#core-data-below-form").html(data);
+            $("#compose").html(data);
         });
     });
 

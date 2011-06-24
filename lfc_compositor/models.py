@@ -41,7 +41,7 @@ class Composite(BaseContent):
         """
         """
         rows = self.get_rows()
-        amount = len(rows)-1
+        amount = len(rows) - 1
         content = ""
         for i, row in enumerate(self.get_rows()):
             if i == 0:
@@ -56,11 +56,29 @@ class Composite(BaseContent):
 
             content += row.render(request, edit, is_first, is_last)
 
-        return render_to_string("lfc_compositor/widgets/composite.html", RequestContext(request, {
-            "composite" : self,
-            "content" : content,
-            "edit" : edit and (amount == -1),
-        }))
+        if edit:
+            return render_to_string("lfc_compositor/widgets/composite.html", RequestContext(request, {
+                "composite" : self,
+                "content" : content,
+                "edit" : edit and (amount == -1),
+            }))
+        else:
+            self.context["composite"] = self
+            self.context["content"] = content
+            self.context["edit"] = edit and (amount == -1)
+
+            return super(Composite, self).render(request)
+            
+    def get_tabs(self, request):
+        """Returns the extra tabs of the model.
+        """
+        return [
+            {
+                "id" : "compose",
+                "name" : "Compose",
+                "content" : self.render(request, True),
+            },
+        ]
 
     def edit_form(self, **kwargs):
         """Returns the add/edit form of the page.
@@ -75,9 +93,6 @@ class CompositeForm(forms.ModelForm):
     class Meta:
         model = Composite
         fields = ("title", "display_title", "slug", "tags")
-
-    def below_form(self, request):
-        return self.instance.render(request, True)
 
 class Row(models.Model):
     """A row for composite. A row can have multiple columns.
@@ -235,7 +250,7 @@ class Widget(models.Model):
     parent = models.ForeignKey(Column, verbose_name=_(u"Column"), related_name="widgets")
     position = models.IntegerField(_(u"Position"), blank=True, null=True)
     content_type = models.CharField(blank=True, max_length=100)
-    
+
     class Meta:
         ordering = ("position", )
 

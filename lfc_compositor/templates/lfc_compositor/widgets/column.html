@@ -5,6 +5,7 @@
         <div style="clear: both">
             {% if deletable %}
                 <a class="cp-hover delete-link"
+                   is_ajax="1"                
                    id="column-{{ column.id }}"
                    href="{% url compositor_delete_column column.id %}">
                     <img src="{{ MEDIA_URL }}lfc_compositor/icons/delete_column.png" alt='{% trans "Delete Column" %}' title='{% trans "Delete Column" %}'/>

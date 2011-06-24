@@ -1,5 +1,7 @@
 {% extends "lfc/base.html" %}
-{% load compositor_tags %}
+{% load portlets_tags %}
+
+{% block section %}compositor{% endblock %}
 
 {% block content %}
     {% if lfc_context.display_title %}
@@ -7,11 +9,6 @@
     {% endif %}
     
     <div>
-        {% render %}
+        {{ content|safe }}
     </div>
-
-    <div class="overlay" id="overlay">
-        <div class="content"></div>
-    </div>
-
 {% endblock %}

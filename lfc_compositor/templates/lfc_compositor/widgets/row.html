@@ -1,8 +1,10 @@
 {% load i18n %}
 {% if edit %}
+    <h1>{% trans "Compose" %}</h1>
     <div style="background-color: transparent">
 
         <a class="cp-hover delete-link"
+           is_ajax="1"
            id="row-{{ row.id }}"
            href="{% url compositor_delete_row row.id %}">
             <img src="{{ MEDIA_URL }}lfc_compositor/icons/delete_row.png" alt='{% trans "Delete Row" %}' title='{% trans "Delete Row" %}'/>
@@ -32,5 +34,5 @@
     </div>
 {% endif %}
 <table class="row-{{ row.id }} lfc-compositor-default">
-    <tr class="compositor-row row-{{ row.id }}" >{{ content|safe }}</tr>
+    <tr class="compositor-row row-{{ row.id }}">{{ content|safe }}</tr>
 </table>

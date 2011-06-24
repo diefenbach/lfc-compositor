@@ -1,7 +1,9 @@
 {% load i18n %}
-<div style="max-width:1000px">
+
+<div>
     {{ content|safe }}
     {% if edit %}
+        <h1>{% trans "Compose" %}</h1>
         <div>
             <a class="ajax-link" 
                href="{% url compositor_add_row composite.id %}">

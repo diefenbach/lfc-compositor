@@ -2,17 +2,18 @@
 <form action="{% url compositor_edit_widget widget.id %}"
       method="POST"
       enctype="multipart/form-data">
+    {% csrf_token %}
 
     <h1>{% trans "Edit Widget22" %}</h1>
 
     {% include "lfc/manage/lfc_form.html" %}
 
-    <input class="ajax-submit" 
+    <input class="ajax-submit"
            type="submit" />
 </form>
 
 <script>
     $(function() {
         addEditor("#id_content");
-    })    
+    })
 </script>

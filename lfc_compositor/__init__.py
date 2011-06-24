@@ -41,6 +41,6 @@ def uninstall():
     unregister_template("Composite")
 
     # Unregister resources
-    unregister_resource(type=CSS, group="manage", path="lfc_compositor/compositor_manage.css")
-    unregister_resource(type=CSS, group="lfc", path="lfc_compositor/compositor.css")
-    unregister_resource(type=JS, group="manage", path="lfc_compositor/compositor.js")
+    unregister_resource(path="lfc_compositor/compositor_manage.css")
+    unregister_resource(path="lfc_compositor/compositor.css")
+    unregister_resource(path="lfc_compositor/compositor.js")

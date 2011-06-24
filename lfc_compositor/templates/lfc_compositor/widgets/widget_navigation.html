@@ -1,6 +1,6 @@
 {% load i18n %}
 <div class="widget-navigation">
-    <a class="cp-hover delete-link" id="widget-{{ widget.id }}" href="{% url compositor_delete_widget widget.id %}">
+    <a class="cp-hover delete-link" is_ajax="1" id="widget-{{ widget.id }}" href="{% url compositor_delete_widget widget.id %}">
        <img src="{{ MEDIA_URL }}lfc/icons/page_delete.png" alt='{% trans "Delete Widget" %}' title='{% trans "Delete Widget" %}'/>
     </a>
     <a class="cp-hover ajax-link" id="widget-{{ widget.id }}" href="{% url compositor_edit_widget widget.id %}">
