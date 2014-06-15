@@ -5,42 +5,42 @@
         <div style="clear: both">
             {% if deletable %}
                 <a class="cp-hover delete-link"
-                   is_ajax="1"                
+                   is_ajax="1"
                    id="column-{{ column.id }}"
-                   href="{% url compositor_delete_column column.id %}">
+                   href="{% url 'compositor_delete_column' column.id %}">
                     <img src="{{ MEDIA_URL }}lfc_compositor/icons/delete_column.png" alt='{% trans "Delete Column" %}' title='{% trans "Delete Column" %}'/>
                 </a>
             {% endif %}
 
             <a class="cp-hover ajax-link"
                id="column-{{ column.id }}"
-               href="{% url compositor_add_column column.parent.id %}?position={{ column.position }}">
+               href="{% url 'compositor_add_column' column.parent.id %}?position={{ column.position }}">
                 <img src="{{ MEDIA_URL }}lfc_compositor/icons/add_column.png" alt='{% trans "Add Column" %}' title='{% trans "Add Column" %}'/>
             </a>
-            
+
             {% if not first_col %}
                 <a class="cp-hover ajax-link"
                    id="column-{{ column.id }}"
-                   href="{% url compositor_move_column column.id %}?direction=0">
+                   href="{% url 'compositor_move_column' column.id %}?direction=0">
                     <img src="{{ MEDIA_URL }}lfc/icons/arrow_left.png" alt='{% trans "Move Column Left" %}' title='{% trans "Move Column Left" %}' />
-                </a>                
+                </a>
             {% endif %}
             {% if not last_col %}
                 <a class="cp-hover ajax-link"
                    id="column-{{ column.id }}"
-                   href="{% url compositor_move_column column.id %}?direction=1">
+                   href="{% url 'compositor_move_column' column.id %}?direction=1">
                     <img src="{{ MEDIA_URL }}lfc/icons/arrow_right.png" alt='{% trans "Move Column Right" %}' title='{% trans "Move Column Right" %}' />
                 </a>
             {% endif %}
             <input type="text"
                    style="width:40px; margin: 3px 0; position: relative; top:-3px"
                    {% if column.width %}value="{{ column.width }}{% endif %}"
-                   data="{% url compositor_change_width column.id %}"
+                   data="{% url 'compositor_change_width' column.id %}"
                    class="cp-width" />
        </div>
        {{ content|safe }}
 
-        <form style="clear: both; padding: 10px 0" action="{% url compositor_add_widget %}"
+        <form style="clear: both; padding: 10px 0" action="{% url 'compositor_add_widget' %}"
               method="GET">
             <select name="type">
                 <option value="textwidget">{% trans "Text" %}</option>

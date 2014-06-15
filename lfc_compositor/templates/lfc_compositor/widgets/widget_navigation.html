@@ -1,15 +1,15 @@
 {% load i18n %}
 <div class="widget-navigation">
-    <a class="cp-hover delete-link" is_ajax="1" id="widget-{{ widget.id }}" href="{% url compositor_delete_widget widget.id %}">
+    <a class="cp-hover delete-link" is_ajax="1" id="widget-{{ widget.id }}" href="{% url 'compositor_delete_widget' widget.id %}">
        <img src="{{ MEDIA_URL }}lfc/icons/page_delete.png" alt='{% trans "Delete Widget" %}' title='{% trans "Delete Widget" %}'/>
     </a>
-    <a class="cp-hover ajax-link" id="widget-{{ widget.id }}" href="{% url compositor_edit_widget widget.id %}">
+    <a class="cp-hover ajax-link" id="widget-{{ widget.id }}" href="{% url 'compositor_edit_widget' widget.id %}">
        <img src="{{ MEDIA_URL }}lfc/icons/page_edit.png" alt='{% trans "Edit" %}' title='{% trans "Edit" %}'/>
     </a>
     {% if not first_widget %}
         <a class="cp-hover ajax-link"
            id="widget-{{ widget.id }}"
-           href="{% url compositor_move_widget widget.id %}?direction=0">
+           href="{% url 'compositor_move_widget' widget.id %}?direction=0">
             <img src="{{ MEDIA_URL }}lfc/icons/arrow_up.png" alt='{% trans "Move Widget Up" %}' title='{% trans "Move Widget Up" %}' />
         </a>
     {% endif %}
@@ -17,9 +17,9 @@
     {% if not last_widget %}
         <a class="cp-hover ajax-link"
            id="widget-{{ widget.id }}"
-           href="{% url compositor_move_widget widget.id %}?direction=1">
+           href="{% url 'compositor_move_widget' widget.id %}?direction=1">
             <img src="{{ MEDIA_URL }}lfc/icons/arrow_down.png" alt='{% trans "Move Widget Down" %}' title='{% trans "Move Widget Down" %}' />
         </a>
     {% endif %}
-    
+
 </div>

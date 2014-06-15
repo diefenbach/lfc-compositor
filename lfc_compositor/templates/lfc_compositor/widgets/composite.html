@@ -5,9 +5,9 @@
     {% if edit %}
         <h1>{% trans "Compose" %}</h1>
         <div>
-            <a class="ajax-link" 
-               href="{% url compositor_add_row composite.id %}">
-               <img src="{{ MEDIA_URL }}lfc_compositor/icons/add_row.png" alt='{% trans "Add Row" %}' title='{% trans "Add Row" %}'/>           
+            <a class="ajax-link"
+               href="{% url 'compositor_add_row' composite.id %}">
+               <img src="{{ MEDIA_URL }}lfc_compositor/icons/add_row.png" alt='{% trans "Add Row" %}' title='{% trans "Add Row" %}'/>
             </a>
         </div>
     {% endif %}

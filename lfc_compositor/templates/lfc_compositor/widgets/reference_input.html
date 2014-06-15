@@ -2,9 +2,9 @@
 
 <div class="cp-breadcrumbs">
     <span>{% trans "Your are here" %}:</span>
-    <a class="ajax-link" href="{% url compositor_load_reference 0 %}?composite={{ composite_id }}">{% trans "Portal" %}</a>
+    <a class="ajax-link" href="{% url 'compositor_load_reference' 0 %}?composite={{ composite_id }}">{% trans "Portal" %}</a>
     {% for breadcrumb in breadcrumbs %}
-        &gt; <a class="ajax-link" href="{% url compositor_load_reference breadcrumb.id %}?composite={{ composite_id }}">{{ breadcrumb.title }}</a>
+        &gt; <a class="ajax-link" href="{% url 'compositor_load_reference' breadcrumb.id %}?composite={{ composite_id }}">{{ breadcrumb.title }}</a>
     {% endfor %}
 </div>
 
@@ -19,7 +19,7 @@
                 </td>
                 <td>
                     {% if child.has_children %}
-                        <a class="ajax-link" href="{% url compositor_load_reference child.id %}?composite={{ composite_id }}">{{ child.title }}</a>
+                        <a class="ajax-link" href="{% url 'compositor_load_reference' child.id %}?composite={{ composite_id }}">{{ child.title }}</a>
                     {% else %}
                         <span>{{ child.title }}</span>
                     {% endif %}

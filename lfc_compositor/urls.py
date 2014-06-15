@@ -1,4 +1,6 @@
-from django.conf.urls.defaults import *
+# django imports
+from django.conf.urls import patterns
+from django.conf.urls import url
 
 # URL patterns for compositor
 urlpatterns = patterns('lfc_compositor.views',
@@ -7,7 +9,7 @@ urlpatterns = patterns('lfc_compositor.views',
 
     url(r'^add-column/(?P<id>\d*)$', "add_column", name="compositor_add_column"),
     url(r'^delete-column/(?P<id>\d*)$', "delete_column", name="compositor_delete_column"),
-        
+
     url(r'^add-widget$', "add_widget", name="compositor_add_widget"),
     url(r'^edit-widget/(?P<id>\d*)$', "edit_widget", name="compositor_edit_widget"),
     url(r'^delete-widget/(?P<id>\d*)$', "delete_widget", name="compositor_delete_widget"),
